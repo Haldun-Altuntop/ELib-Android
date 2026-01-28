@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Elib" parent="Theme.Material3.Light.NoActionBar" />
+
+    <style name="CircularImage">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="SearchView">
+        <item name="android:background">@color/teal_200</item>
+        <item name="cardCornerRadius">10dp</item>
+    </style>
+
+    <style name="Button">
+        <item name="cornerRadius">10dp</item>
+    </style>
+
+    <style name="OutlinedIconButton">
+        <item name="cornerRadius">10dp</item>
+        <item name="backgroundColor">@color/purple_200</item>
+    </style>
+</resources>
