@@ -19,6 +19,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".LogisterActivity"
+            android:theme="@style/Theme.Elib.Dialog"
             android:exported="false" />
         <activity
             android:name=".BookDetailsActivity"

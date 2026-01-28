@@ -1,31 +1,36 @@
 package arc.haldun.elib
 
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import arc.haldun.math.matrix.Main
+import arc.haldun.math.matrix.Matrix
 import arc.haldun.mylibrary.driver.Connector
 import arc.haldun.mylibrary.driver.DatabaseManager
 import arc.haldun.mylibrary.driver.MariaDB
 import arc.haldun.mylibrary.driver.objects.Book
+import arc.haldun.mylibrary.driver.objects.User
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.DataOutputStream
 import java.io.File
-import kotlin.toString
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,12 +47,24 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private var loginDialogView: View? = null
+    private var loginDialogView_et_username: EditText? = null
+    private var loginDialogView_et_password: EditText? = null
+    private var loginDialogView_btn_login: Button? = null
+    private var loginDialogView_cb_rememberMe: CheckBox? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
+        loginDialogView = layoutInflater.inflate(R.layout.activity_logister, null)
+        loginDialogView_et_username = loginDialogView?.findViewById(R.id.activity_logister_et_username)
+        loginDialogView_et_password = loginDialogView?.findViewById(R.id.activity_logister_et_password)
+        loginDialogView_btn_login = loginDialogView?.findViewById(R.id.activity_logister_btn_login)
+        loginDialogView_cb_rememberMe = loginDialogView?.findViewById(R.id.activity_logister_cb_remember_me)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -58,11 +75,72 @@ class HomeFragment : Fragment() {
 
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
-            val intent = Intent(requireContext(), LogisterActivity::class.java)
-            intent.action
-            startActivity(intent)
+
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setView(loginDialogView)
+
+            loginDialogView_btn_login?.setOnClickListener {
+                btnLoginClick()
+            }
+
+            builder.create().show()
         }
 
+    }
+
+    private fun btnLoginClick() {
+        val username = loginDialogView_et_username?.text.toString()
+        val password = loginDialogView_et_password?.text.toString()
+        val rememberMe = loginDialogView_cb_rememberMe?.isChecked
+
+        //TODO: Login
+        val userTmp = User.createTemplate(username, password)
+
+
+        if (rememberMe == true) {
+
+            // Check encryption key
+            val keyFileName = "key"
+            val keyFile = File(requireContext().filesDir, keyFileName)
+            if (!keyFile.exists()) {
+                if (!keyFile.createNewFile()) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Anahtar oluşturulamadı. Beni hatırla çalışmayacak.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return
+                }
+            }
+            var inputStream = requireContext().openFileInput(keyFileName)
+            if (inputStream.available() == 0) {
+                inputStream.close()
+
+                val key = Matrix(4, 4)
+                key.fillRandom()
+
+                val os = requireContext().openFileOutput("key", MODE_PRIVATE)
+                key.serialize(os)
+                os.close()
+            }
+
+            inputStream = requireContext().openFileInput(keyFileName)
+            val key = Matrix.deserialize(inputStream)
+            inputStream.close()
+
+            // Encrypt username and password
+
+            val data = userTmp.toString().toByteArray()
+            val encryptedData = Main.encrypt(data, key)
+
+            val os = requireContext().openFileOutput("user", MODE_PRIVATE)
+            val dos = DataOutputStream(os)
+            for (i in 0 until encryptedData.size) {
+                dos.writeDouble(encryptedData[i])
+            }
+            dos.close()
+            os.close()
+        }
     }
 
     private fun handleRecyclerView(view: View) {
