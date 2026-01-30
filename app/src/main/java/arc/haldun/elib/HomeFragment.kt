@@ -185,15 +185,20 @@ class HomeFragment : Fragment() {
 
             if (checkedIds.isNotEmpty()) {
 
-                checkedIds.forEach { chipId ->
+                onCategoryCheckedChange(checkedIds)
 
-                    val secilenChip = view.findViewById<Chip>(chipId)
-                    val turAdi = secilenChip.contentDescription.toString() //
-                    Toast.makeText(context, turAdi, Toast.LENGTH_SHORT).show()
-                }
             } else {
                 Toast.makeText(context, "tümü", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun onCategoryCheckedChange(checkedIds: List<Int>) {
+        checkedIds.forEach { chipId ->
+
+            val secilenChip = view?.findViewById<Chip>(chipId)
+            val turAdi = secilenChip?.contentDescription.toString() //
+            Toast.makeText(context, turAdi, Toast.LENGTH_SHORT).show()
         }
     }
 
