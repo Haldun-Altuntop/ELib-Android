@@ -19,8 +19,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.TokenManager
-import arc.haldun.mylibrary.driver.DatabaseManager
-import arc.haldun.mylibrary.driver.MariaDB
 import arc.haldun.mylibrary.driver.objects.Book
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -72,9 +70,13 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         progressBar = view.findViewById(R.id.fragment_home_progressbar)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.fragment_home_recyclerview)
+        val layoutManager = GridLayoutManager(context, 2)
+        recyclerView.layoutManager = layoutManager
 
         handleSelectedCategories(view)
         handleRecyclerView(view)
+
 
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
