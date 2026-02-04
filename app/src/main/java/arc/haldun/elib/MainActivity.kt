@@ -11,6 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import arc.haldun.math.matrix.Main
 import arc.haldun.math.matrix.Matrix
+import arc.haldun.mylibrary.api.LibraryInitializer
+import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.objects.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONObject
@@ -29,6 +31,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        LibraryInitializer.initialize(applicationContext.filesDir.absolutePath)
+
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
         }
@@ -43,44 +47,6 @@ class MainActivity : AppCompatActivity() {
 
             true
         }
-
-        //DEBUG
-        loadExistingUser()
-    }
-
-    fun loadExistingUser() {
-        val userFileName = "user"
-        val userFile = File(filesDir, userFileName)
-        if  (!userFile.exists()) return
-
-        val userData = ArrayList<Double>()
-        val userFileInputStream = openFileInput(userFileName)
-        val userFileDIS = DataInputStream(userFileInputStream)
-        while (userFileDIS.available() > 0) {
-            val d = userFileDIS.readDouble()
-            userData.add(d)
-        }
-        userFileDIS.close()
-        userFileInputStream.close()
-
-        val keyFileName = "key"
-        val keyFile = File(filesDir, keyFileName)
-        if (!keyFile.exists()) {
-            Toast.makeText(applicationContext, "Yeniden giriş yapmalısınız.", Toast.LENGTH_SHORT).show()
-            Log.w("Remember Me Key File", "Cannot found!")
-            return
-        }
-
-        val keyIS = openFileInput(keyFileName)
-        val key = Matrix.deserialize(keyIS)
-        keyIS.close()
-
-        val decryptedUserData = Main.decrypt(userData.toDoubleArray(), key)
-        val userStringData = String(decryptedUserData)
-        val userJson = JSONObject(userStringData)
-        val user = User(userJson)
-
-        Log.d("Remember Me", user.toString())
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -103,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         return super.onContextItemSelected(item)
     }
 
-    private fun loadFragment(fragment: Fragment) {
+    fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, fragment)
             .commit()

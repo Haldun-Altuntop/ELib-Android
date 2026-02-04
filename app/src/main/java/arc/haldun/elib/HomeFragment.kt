@@ -1,6 +1,5 @@
 package arc.haldun.elib
 
-import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,20 +16,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import arc.haldun.math.matrix.Main
-import arc.haldun.math.matrix.Matrix
-import arc.haldun.mylibrary.driver.Connector
+import arc.haldun.mylibrary.api.ApiService
+import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.DatabaseManager
 import arc.haldun.mylibrary.driver.MariaDB
 import arc.haldun.mylibrary.driver.objects.Book
-import arc.haldun.mylibrary.driver.objects.User
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.DataOutputStream
-import java.io.File
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,6 +47,8 @@ class HomeFragment : Fragment() {
     private var loginDialogView_et_password: EditText? = null
     private var loginDialogView_btn_login: Button? = null
     private var loginDialogView_cb_rememberMe: CheckBox? = null
+
+    private lateinit var loginDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,14 +73,20 @@ class HomeFragment : Fragment() {
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
 
-            val builder = AlertDialog.Builder(requireContext())
-            builder.setView(loginDialogView)
+            if (TokenManager().getToken() == null) {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setView(loginDialogView)
 
-            loginDialogView_btn_login?.setOnClickListener {
-                btnLoginClick()
+                loginDialogView_btn_login?.setOnClickListener {
+                    btnLoginClick()
+                }
+
+                loginDialog = builder.create()
+                loginDialog.show()
+            } else {
+                val activity = activity as MainActivity
+                activity.loadFragment(ProfileFragment())
             }
-
-            builder.create().show()
         }
 
     }
@@ -93,54 +96,28 @@ class HomeFragment : Fragment() {
         val password = loginDialogView_et_password?.text.toString()
         val rememberMe = loginDialogView_cb_rememberMe?.isChecked
 
-        //TODO: Login
-        val userTmp = User.createTemplate(username, password)
+        Thread {
 
+            val api = ApiService()
+            val res = api.login(username, password)
 
-        if (rememberMe == true) {
+            lifecycleScope.launch(Dispatchers.Main) {
 
-            // Check encryption key
-            val keyFileName = "key"
-            val keyFile = File(requireContext().filesDir, keyFileName)
-            if (!keyFile.exists()) {
-                if (!keyFile.createNewFile()) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Anahtar oluşturulamadı. Beni hatırla çalışmayacak.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return
+                if (res != null) {
+                    Toast.makeText(context, "Giriş başarılı.", Toast.LENGTH_SHORT).show()
+
+                    if (rememberMe == true) {
+                        TokenManager().saveToken(res)
+                    }
+
+                    loginDialog.dismiss()
+
+                } else {
+                    Toast.makeText(context, "Giriş başarısız.", Toast.LENGTH_SHORT).show()
                 }
             }
-            var inputStream = requireContext().openFileInput(keyFileName)
-            if (inputStream.available() == 0) {
-                inputStream.close()
 
-                val key = Matrix(4, 4)
-                key.fillRandom()
-
-                val os = requireContext().openFileOutput("key", MODE_PRIVATE)
-                key.serialize(os)
-                os.close()
-            }
-
-            inputStream = requireContext().openFileInput(keyFileName)
-            val key = Matrix.deserialize(inputStream)
-            inputStream.close()
-
-            // Encrypt username and password
-
-            val data = userTmp.toString().toByteArray()
-            val encryptedData = Main.encrypt(data, key)
-
-            val os = requireContext().openFileOutput("user", MODE_PRIVATE)
-            val dos = DataOutputStream(os)
-            for (i in 0 until encryptedData.size) {
-                dos.writeDouble(encryptedData[i])
-            }
-            dos.close()
-            os.close()
-        }
+        }.start()
     }
 
     private fun handleRecyclerView(view: View) {
@@ -158,13 +135,13 @@ class HomeFragment : Fragment() {
         )
 
         Thread {
-            Connector.connect("jdbc:mariadb://192.168.1.1:3306/e_lib", "haldun", "6047")
+            //Connector.connect("jdbc:mariadb://192.168.1.1:3306/e_lib", "haldun", "6047")
             Log.d("Home Fragment", "Bağlandı")
 
             val manager = DatabaseManager(MariaDB())
             bookList = manager.books.toList()
 
-            Connector.shutdown()
+            //Connector.shutdown()
 
             lifecycleScope.launch(Dispatchers.Main) {
                 // recycler view burada işlenecek
