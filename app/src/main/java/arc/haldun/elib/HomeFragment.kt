@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -48,6 +49,8 @@ class HomeFragment : Fragment() {
     private var loginDialogView_btn_login: Button? = null
     private var loginDialogView_cb_rememberMe: CheckBox? = null
 
+    private lateinit var progressBar: ProgressBar
+
     private lateinit var loginDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,10 +65,13 @@ class HomeFragment : Fragment() {
         loginDialogView_et_password = loginDialogView?.findViewById(R.id.activity_logister_et_password)
         loginDialogView_btn_login = loginDialogView?.findViewById(R.id.activity_logister_btn_login)
         loginDialogView_cb_rememberMe = loginDialogView?.findViewById(R.id.activity_logister_cb_remember_me)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        progressBar = view.findViewById(R.id.fragment_home_progressbar)
 
         handleSelectedCategories(view)
         handleRecyclerView(view)
@@ -112,6 +118,9 @@ class HomeFragment : Fragment() {
 
                     loginDialog.dismiss()
 
+                    val activity = activity as MainActivity
+                    activity.loadFragment(ProfileFragment())
+
                 } else {
                     Toast.makeText(context, "Giriş başarısız.", Toast.LENGTH_SHORT).show()
                 }
@@ -126,34 +135,23 @@ class HomeFragment : Fragment() {
         val layoutManager = GridLayoutManager(context, 2)
         recyclerView.layoutManager = layoutManager
 
-        var bookList = listOf(
-            Book(0, "Suç ve Ceza", "F. Dostoyevski", "Can", 2003, 986, "Roman", "CCV", "4. dolap", 0),
-            Book(0, "Anne Karenina", "F. Dostoyevski", "Can", 2003, 1029, "Roman", "CCV", "4. dolap", 0),
-            Book(0, "Piyanist", "Wladyslav Spzilman", "Koridor", 2003, 986, "Roman", "CCV", "4. dolap", 0),
-            Book(0, "Aklından Bir Sayı Tut", "John Verdon", "Can", 2003, 986, "Roman", "CCV", "4. dolap", 0),
-            Book(0, "Toplum Sözleşmesi", "J. J. Rousseau", "Can", 2003, 986, "Roman", "CCV", "4. dolap", 0),
-        )
-
         Thread {
-            //Connector.connect("jdbc:mariadb://192.168.1.1:3306/e_lib", "haldun", "6047")
-            Log.d("Home Fragment", "Bağlandı")
 
-            val manager = DatabaseManager(MariaDB())
-            bookList = manager.books.toList()
+            Log.d("HomeFragment", "Thread başladı")
 
-            //Connector.shutdown()
+            val bookList = ApiService().getBooks()
+            Log.d("HomeFragment", "Kitaplar yüklendi: ${bookList.size}")
 
             lifecycleScope.launch(Dispatchers.Main) {
-                // recycler view burada işlenecek
+                progressBar.visibility = View.GONE
+                val adapter = BookAdapter(ArrayList(bookList.toList()), onItemClick = {
+                    val intent = Intent(context, BookDetailsActivity::class.java)
+                    intent.putExtra("book", it.toString())
+                    startActivity(intent)
+                })
+                recyclerView.adapter = adapter
             }
-        }
-
-        val adapter = BookAdapter(ArrayList(bookList), onItemClick = {
-            val intent = Intent(context, BookDetailsActivity::class.java)
-            intent.putExtra("book", it.toString())
-            startActivity(intent)
-        })
-        recyclerView.adapter = adapter
+        }.start()
     }
 
     private fun handleSelectedCategories(view: View) {
@@ -247,7 +245,7 @@ class HomeFragment : Fragment() {
                 tvRating.text = "123"
 
                 btnFav.setOnClickListener {
-                    Toast.makeText(itemView.context, "Favorilere eklemek için giriş yapmalısınız.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(itemView.context, "Şimdilik desteklenmiyor", Toast.LENGTH_SHORT).show()
 
                     addToFav(book)
                 }

@@ -11,8 +11,10 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import arc.haldun.math.matrix.Main
 import arc.haldun.math.matrix.Matrix
+import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.LibraryInitializer
 import arc.haldun.mylibrary.api.TokenManager
+import arc.haldun.mylibrary.api.UserRepository
 import arc.haldun.mylibrary.driver.objects.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.json.JSONObject
@@ -32,6 +34,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         LibraryInitializer.initialize(applicationContext.filesDir.absolutePath)
+
+        // Check token validity
+        Thread {
+            val user = UserRepository(ApiService()).getUser()
+            if (user == null) {
+                TokenManager().forgetToken()
+            }
+        }.start()
 
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
