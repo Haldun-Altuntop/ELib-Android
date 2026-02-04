@@ -2,7 +2,6 @@ package arc.haldun.elib
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import arc.haldun.elib.models.BookListModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.objects.Book
@@ -47,6 +47,8 @@ class HomeFragment : Fragment() {
     private var loginDialogView_btn_login: Button? = null
     private var loginDialogView_cb_rememberMe: CheckBox? = null
 
+    private lateinit var recyclerView: RecyclerView
+
     private lateinit var progressBar: ProgressBar
 
     private lateinit var loginDialog: AlertDialog
@@ -70,13 +72,16 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         progressBar = view.findViewById(R.id.fragment_home_progressbar)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.fragment_home_recyclerview)
+        recyclerView = view.findViewById<RecyclerView>(R.id.fragment_home_recyclerview)
         val layoutManager = GridLayoutManager(context, 2)
         recyclerView.layoutManager = layoutManager
 
         handleSelectedCategories(view)
-        handleRecyclerView(view)
+        initRecyclerView()
 
+        BookListModel.action = {
+            initRecyclerView()
+        }
 
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
@@ -98,6 +103,17 @@ class HomeFragment : Fragment() {
         }
 
     }
+
+    fun initRecyclerView() {
+        progressBar.visibility = View.GONE
+        val adapter = BookAdapter(ArrayList(BookListModel.getBookList().toList()), onItemClick = {
+            val intent = Intent(context, BookDetailsActivity::class.java)
+            intent.putExtra("book", it.toString())
+            startActivity(intent)
+        })
+        recyclerView.adapter = adapter
+    }
+
 
     private fun btnLoginClick() {
         val username = loginDialogView_et_username?.text.toString()
@@ -128,31 +144,6 @@ class HomeFragment : Fragment() {
                 }
             }
 
-        }.start()
-    }
-
-    private fun handleRecyclerView(view: View) {
-
-        val recyclerView = view.findViewById<RecyclerView>(R.id.fragment_home_recyclerview)
-        val layoutManager = GridLayoutManager(context, 2)
-        recyclerView.layoutManager = layoutManager
-
-        Thread {
-
-            Log.d("HomeFragment", "Thread başladı")
-
-            val bookList = ApiService().getBooks()
-            Log.d("HomeFragment", "Kitaplar yüklendi: ${bookList.size}")
-
-            lifecycleScope.launch(Dispatchers.Main) {
-                progressBar.visibility = View.GONE
-                val adapter = BookAdapter(ArrayList(bookList.toList()), onItemClick = {
-                    val intent = Intent(context, BookDetailsActivity::class.java)
-                    intent.putExtra("book", it.toString())
-                    startActivity(intent)
-                })
-                recyclerView.adapter = adapter
-            }
         }.start()
     }
 
