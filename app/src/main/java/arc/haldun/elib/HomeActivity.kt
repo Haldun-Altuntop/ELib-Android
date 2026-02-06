@@ -7,12 +7,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import arc.haldun.elib.viewmodels.BookListViewModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.LibraryInitializer
 import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.api.UserRepository
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeActivity : AppCompatActivity() {
 
@@ -32,12 +36,14 @@ class HomeActivity : AppCompatActivity() {
         LibraryInitializer.initialize(applicationContext.filesDir.absolutePath)
 
         // Check token validity
-        Thread {
-            val user = UserRepository(ApiService()).getUser()
-            if (user == null) {
-                TokenManager().forgetToken()
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val user = UserRepository(ApiService()).getUser()
+                if (user == null) {
+                    TokenManager().forgetToken()
+                }
             }
-        }.start()
+        }
 
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
