@@ -97,7 +97,7 @@ class HomeFragment : Fragment() {
                 loginDialog = builder.create()
                 loginDialog.show()
             } else {
-                val activity = activity as MainActivity
+                val activity = activity as HomeActivity
                 activity.loadFragment(ProfileFragment())
             }
         }
@@ -136,7 +136,7 @@ class HomeFragment : Fragment() {
 
                     loginDialog.dismiss()
 
-                    val activity = activity as MainActivity
+                    val activity = activity as HomeActivity
                     activity.loadFragment(ProfileFragment())
 
                 } else {
