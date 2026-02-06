@@ -13,7 +13,7 @@ class BookListViewModel {
         Log.d("BookListViewModel", "Kitaplar yükleniyor...")
 
 
-        var books: Array<Book>? = null
+        var books: Array<Book>
 
         val handler = android.os.Handler(Looper.getMainLooper())
 
@@ -21,7 +21,7 @@ class BookListViewModel {
             books = ApiService().getBooks()
 
             handler.post {
-                Log.d("BookListViewModel", "Kitaplar yüklendi: ${books?.size}")
+                Log.d("BookListViewModel", "Kitaplar yüklendi: ${books.size}")
 
                 BookListModel.setBookList(books)
             }
