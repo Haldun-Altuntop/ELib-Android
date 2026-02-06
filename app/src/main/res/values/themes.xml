@@ -22,4 +22,10 @@
         <item name="cornerRadius">10dp</item>
         <item name="backgroundColor">@color/purple_200</item>
     </style>
+    
+    <style name="Theme.Elib.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Elib</item>
+    </style>
 </resources>
