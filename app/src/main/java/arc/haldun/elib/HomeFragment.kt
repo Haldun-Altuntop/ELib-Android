@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arc.haldun.elib.models.BookListModel
+import arc.haldun.elib.viewmodels.BookListViewModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.objects.Book
@@ -53,6 +54,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var loginDialog: AlertDialog
 
+    private var bookListViewModel = BookListViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -82,6 +85,8 @@ class HomeFragment : Fragment() {
         BookListModel.action = {
             initRecyclerView()
         }
+
+        bookListViewModel.fetch()
 
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
@@ -157,17 +162,24 @@ class HomeFragment : Fragment() {
 
             } else {
                 Toast.makeText(context, "tümü", Toast.LENGTH_SHORT).show()
+                bookListViewModel.fetch()
             }
         }
     }
 
     private fun onCategoryCheckedChange(checkedIds: List<Int>) {
+
+        val types = ArrayList<String>()
+
         checkedIds.forEach { chipId ->
 
             val secilenChip = view?.findViewById<Chip>(chipId)
-            val turAdi = secilenChip?.contentDescription.toString() //
-            Toast.makeText(context, turAdi, Toast.LENGTH_SHORT).show()
+            val turAdi = secilenChip?.contentDescription.toString()
+
+            types.add(turAdi)
         }
+
+        bookListViewModel.fetch(types)
     }
 
     override fun onCreateView(

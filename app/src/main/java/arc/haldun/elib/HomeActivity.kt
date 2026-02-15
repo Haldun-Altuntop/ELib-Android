@@ -20,8 +20,6 @@ import kotlinx.coroutines.withContext
 
 class HomeActivity : AppCompatActivity() {
 
-    private val bookListViewModel = BookListViewModel()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +46,6 @@ class HomeActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             loadFragment(HomeFragment())
         }
-
-        bookListViewModel.fetch()
 
         val bottomBar = findViewById<BottomNavigationView>(R.id.activity_home_bottom_navigation)
         bottomBar.setOnItemSelectedListener { item ->

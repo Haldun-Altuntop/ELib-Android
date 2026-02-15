@@ -13,34 +13,26 @@ import kotlinx.coroutines.withContext
 
 class BookListViewModel: ViewModel() {
 
-    fun fetch() {
+    fun fetch(types: ArrayList<String>) {
 
         Log.d("BookListViewModel", "Kitaplar yükleniyor...")
 
 
         var books: Array<Book>
 
-        val handler = android.os.Handler(Looper.getMainLooper())
-
         viewModelScope.launch {
 
             withContext(Dispatchers.IO) {
-                books = ApiService().getBooks()
+                books = if (types.isEmpty()) ApiService().getBooks()
+                else ApiService().findBooksByType(types)
             }
 
             Log.d("BookListViewModel", "Kitaplar yüklendi: ${books.size}")
             BookListModel.setBookList(books)
         }
+    }
 
-        Thread {
-            books = ApiService().getBooks()
-
-            handler.post {
-                Log.d("BookListViewModel", "Kitaplar yüklendi: ${books.size}")
-
-                BookListModel.setBookList(books)
-            }
-
-        }
+    fun fetch() {
+        fetch(arrayListOf<String>())
     }
 }
