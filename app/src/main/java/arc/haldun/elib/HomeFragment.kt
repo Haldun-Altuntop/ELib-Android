@@ -135,6 +135,8 @@ class HomeFragment : Fragment() {
                 if (res != null) {
                     Toast.makeText(context, "Giriş başarılı.", Toast.LENGTH_SHORT).show()
 
+                    TokenManager().setToken(res)
+
                     if (rememberMe == true) {
                         TokenManager().saveToken(res)
                     }
