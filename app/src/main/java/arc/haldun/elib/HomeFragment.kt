@@ -21,6 +21,7 @@ import arc.haldun.elib.viewmodels.BookListViewModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.objects.Book
+import arc.haldun.time.DateTime
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.imageview.ShapeableImageView
@@ -107,6 +108,7 @@ class HomeFragment : Fragment() {
             }
         }
 
+        setGreetingText(view)
     }
 
     fun initRecyclerView() {
@@ -119,6 +121,18 @@ class HomeFragment : Fragment() {
         recyclerView.adapter = adapter
     }
 
+    private fun setGreetingText(v: View) {
+        val tvGreeting = v.findViewById<TextView>(R.id.fragment_home_tv_greeting)
+        val currentHour = DateTime.now().time.hour
+
+        val msg: String = if (currentHour < 4) "İyi Geceler,"
+        else if (currentHour < 12) "Günaydın,"
+        else if (currentHour < 17) "Tünaydın,"
+        else if (currentHour < 22) "İyi Akşamlar,"
+        else "İyi Geceler,"
+
+        tvGreeting.text = msg
+    }
 
     private fun btnLoginClick() {
         val username = loginDialogView_et_username?.text.toString()
