@@ -1,6 +1,5 @@
 package arc.haldun.elib.viewmodels
 
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
