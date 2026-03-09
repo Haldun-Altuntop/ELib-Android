@@ -2,6 +2,7 @@ package arc.haldun.elib
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arc.haldun.elib.models.BookListModel
+import arc.haldun.elib.models.FavBooksListModel
 import arc.haldun.elib.viewmodels.BookListViewModel
+import arc.haldun.elib.viewmodels.FavBooksListViewModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.TokenManager
 import arc.haldun.mylibrary.driver.objects.Book
@@ -56,6 +59,7 @@ class HomeFragment : Fragment() {
     private lateinit var loginDialog: AlertDialog
 
     private var bookListViewModel = BookListViewModel()
+    private var favBooksListViewModel = FavBooksListViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +92,7 @@ class HomeFragment : Fragment() {
         }
 
         bookListViewModel.fetch()
+        favBooksListViewModel.fetch()
 
         val profile: ShapeableImageView = view.findViewById(R.id.fragment_home_profile_image)
         profile.setOnClickListener {
@@ -246,6 +251,13 @@ class HomeFragment : Fragment() {
             holder.itemView.setOnClickListener { onItemClick(bookList[position]) }
             holder.setData(bookList[position])
 
+            for (book in FavBooksListModel.getFavBookList()) {
+                if (book.id == bookList[position].id) {
+                    holder.isFav = true
+                    holder.btnFav.setImageResource(R.drawable.favorite_filled)
+                    break
+                }
+            }
         }
 
         override fun getItemCount(): Int {
@@ -259,6 +271,10 @@ class HomeFragment : Fragment() {
             val tvRating: TextView = itemView.findViewById(R.id.item_book_tv_rating)
             val btnFav: ShapeableImageView = itemView.findViewById(R.id.item_book_siv_fav)
 
+            val favBooksListViewModel = FavBooksListViewModel()
+
+            var isFav = false
+
 
             fun setData(book: Book) {
                 tvBookName.text = book.name
@@ -266,14 +282,25 @@ class HomeFragment : Fragment() {
                 tvRating.text = "123"
 
                 btnFav.setOnClickListener {
-                    Toast.makeText(itemView.context, "Şimdilik desteklenmiyor", Toast.LENGTH_SHORT).show()
-
                     addToFav(book)
                 }
             }
 
             fun addToFav(book: Book) {
-                // TODO: implement here
+
+                if (!isFav) {
+                    val res = favBooksListViewModel.add(book)
+                    if (res) Log.d("BookAdapter", "Kitap favorilere eklendi")
+                    else Log.d("BookAdapter", "Kitap favorilere eklenemedi")
+                    btnFav.setImageResource(R.drawable.favorite_filled)
+                    isFav = true
+                } else {
+                    val res = favBooksListViewModel.remove(book)
+                    if (res) Log.d("BookAdapter", "Kitap favorilerden çıkartıldı")
+                    else Log.d("BookAdapter", "Kitap favorilerden çıkartılamadı")
+                    btnFav.setImageResource(R.drawable.favorite)
+                    isFav = false
+                }
             }
         }
     }
