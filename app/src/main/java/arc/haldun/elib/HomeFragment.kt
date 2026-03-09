@@ -99,6 +99,11 @@ class HomeFragment : Fragment() {
 
             if (TokenManager().getToken() == null) {
                 val builder = AlertDialog.Builder(requireContext())
+
+                if (loginDialogView?.parent != null) {
+                    (loginDialogView?.parent as ViewGroup).removeView(loginDialogView)
+                }
+
                 builder.setView(loginDialogView)
 
                 loginDialogView_btn_login?.setOnClickListener {
@@ -122,6 +127,59 @@ class HomeFragment : Fragment() {
             val intent = Intent(context, BookDetailsActivity::class.java)
             intent.putExtra("book", it.toString())
             startActivity(intent)
+        }, { holder ->
+            val builder = AlertDialog.Builder(requireContext())
+
+            if (loginDialogView?.parent != null) {
+                (loginDialogView?.parent as ViewGroup).removeView(loginDialogView)
+            }
+
+            builder.setView(loginDialogView)
+            builder.setTitle("Favorilere Eklemek İçin Giriş Yapın")
+
+            loginDialogView_btn_login?.setOnClickListener {
+                val username = loginDialogView_et_username?.text.toString()
+                val password = loginDialogView_et_password?.text.toString()
+                val rememberMe = loginDialogView_cb_rememberMe?.isChecked
+
+                Thread {
+
+                    val api = ApiService()
+                    val res = api.login(username, password)
+
+                    lifecycleScope.launch(Dispatchers.Main) {
+
+                        if (res != null) {
+                            Toast.makeText(context, "Giriş başarılı.", Toast.LENGTH_SHORT).show()
+
+                            TokenManager().setToken(res)
+
+                            if (rememberMe == true) {
+                                TokenManager().saveToken(res)
+                            }
+
+                            favBooksListViewModel.fetch(afterAction = {
+                                if (!holder.isFav) {
+                                    initRecyclerView()
+                                    holder.addToFav()
+                                }
+                            })
+
+                            loginDialog.dismiss()
+
+                            val activity = activity as HomeActivity
+                            //activity.loadFragment(ProfileFragment())
+
+                        } else {
+                            Toast.makeText(context, "Giriş başarısız.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                }.start()
+            }
+
+            loginDialog = builder.create()
+            loginDialog.show()
         })
         recyclerView.adapter = adapter
     }
@@ -233,7 +291,8 @@ class HomeFragment : Fragment() {
 
     class BookAdapter(
         private val bookList: ArrayList<Book>,
-        private val onItemClick: (Book) -> Unit
+        private val onItemClick: (Book) -> Unit,
+        private val showLoginDialog: (BookViewHolder) -> Unit
     ): RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
         override fun onCreateViewHolder(
@@ -250,6 +309,7 @@ class HomeFragment : Fragment() {
         ) {
             holder.itemView.setOnClickListener { onItemClick(bookList[position]) }
             holder.setData(bookList[position])
+            holder.showLoginDialog = showLoginDialog
 
             for (book in FavBooksListModel.getFavBookList()) {
                 if (book.id == bookList[position].id) {
@@ -266,12 +326,15 @@ class HomeFragment : Fragment() {
 
         class BookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+            lateinit var book: Book
             val tvBookName: TextView = itemView.findViewById(R.id.item_book_tv_bookname)
             val tvAuthor: TextView = itemView.findViewById(R.id.item_book_tv_author)
             val tvRating: TextView = itemView.findViewById(R.id.item_book_tv_rating)
             val btnFav: ShapeableImageView = itemView.findViewById(R.id.item_book_siv_fav)
 
             val favBooksListViewModel = FavBooksListViewModel()
+
+            lateinit var showLoginDialog: (BookViewHolder) -> Unit
 
             var isFav = false
 
@@ -280,13 +343,19 @@ class HomeFragment : Fragment() {
                 tvBookName.text = book.name
                 tvAuthor.text = book.author
                 tvRating.text = "123"
+                this.book = book
 
                 btnFav.setOnClickListener {
-                    addToFav(book)
+                    addToFav()
                 }
             }
 
-            fun addToFav(book: Book) {
+            fun addToFav() {
+
+                if (TokenManager().getToken() == null) {
+                    showLoginDialog.invoke(this)
+                    return
+                }
 
                 if (!isFav) {
                     val res = favBooksListViewModel.add(book)

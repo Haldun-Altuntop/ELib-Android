@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 
 class FavBooksListViewModel: ViewModel() {
 
-    fun fetch() {
+    fun fetch(afterAction: (() -> Unit)? = null) {
 
         var favList: Array<Book> = arrayOf()
 
@@ -20,6 +20,7 @@ class FavBooksListViewModel: ViewModel() {
                favList = ApiService().getBookFavList()
            }
             FavBooksListModel.setFavBookList(favList)
+            afterAction?.invoke()
         }
     }
 
