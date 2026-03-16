@@ -310,14 +310,6 @@ class HomeFragment : Fragment() {
             holder.itemView.setOnClickListener { onItemClick(bookList[position]) }
             holder.setData(bookList[position])
             holder.showLoginDialog = showLoginDialog
-
-            for (book in FavBooksListModel.getFavBookList()) {
-                if (book.id == bookList[position].id) {
-                    holder.isFav = true
-                    holder.btnFav.setImageResource(R.drawable.favorite_filled)
-                    break
-                }
-            }
         }
 
         override fun getItemCount(): Int {
@@ -347,6 +339,14 @@ class HomeFragment : Fragment() {
 
                 btnFav.setOnClickListener {
                     addToFav()
+                }
+
+                isFav = FavBooksListModel.getFavBookList().any { it.id == book.id }
+
+                if (isFav) {
+                    btnFav.setImageResource(R.drawable.favorite_filled)
+                } else {
+                    btnFav.setImageResource(R.drawable.favorite)
                 }
             }
 
