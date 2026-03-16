@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/categories_chip_group_categories"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:singleLine="true"
+        app:selectionRequired="false">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_story"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="hikaye"
+            android:text="Hikaye" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_memoir"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="anı"
+            android:text="Anı" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_documentary"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="belgesel"
+            android:text="Belgesel" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_essay"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="deneme"
+            android:text="Deneme" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_novel"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="roman"
+            android:text="Roman" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_literature"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="edebiyat"
+            android:text="Edebiyat" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_action"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="aksiyon"
+            android:text="Aksiyon" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_sifi"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="bilim kurgu"
+            android:text="Bilim Kurgu" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/categories_chip_group_categories_biography"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="biyografi"
+            android:text="Biyografi" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+</FrameLayout>

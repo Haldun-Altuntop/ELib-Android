@@ -11,7 +11,10 @@ import kotlinx.coroutines.withContext
 
 class FavBooksListViewModel: ViewModel() {
 
-    fun fetch() {
+    fun fetch(
+        afterAction: (() -> Unit)? = null,
+        types: ArrayList<String>? = null
+    ) {
 
         var favList: Array<Book> = arrayOf()
 
@@ -19,7 +22,23 @@ class FavBooksListViewModel: ViewModel() {
            withContext(Dispatchers.IO) {
                favList = ApiService().getBookFavList()
            }
+
+            if (types != null && types.isNotEmpty()) {
+                val favListFiltered = ArrayList<Book>()
+
+                favList.forEach { book ->
+                    for (type in types) {
+                        if (book.type.lowercase().trim() == type) {
+                            favListFiltered.add(book)
+                        }
+                    }
+                }
+
+                favList = favListFiltered.toTypedArray()
+            }
+
             FavBooksListModel.setFavBookList(favList)
+            afterAction?.invoke()
         }
     }
 
