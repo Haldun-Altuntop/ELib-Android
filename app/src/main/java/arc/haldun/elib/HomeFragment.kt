@@ -167,9 +167,6 @@ class HomeFragment : Fragment() {
 
                             loginDialog.dismiss()
 
-                            val activity = activity as HomeActivity
-                            //activity.loadFragment(ProfileFragment())
-
                         } else {
                             Toast.makeText(context, "Giriş başarısız.", Toast.LENGTH_SHORT).show()
                         }
