@@ -6,11 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import arc.haldun.elib.models.FavBooksListModel
 import arc.haldun.elib.viewmodels.FavBooksListViewModel
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 
 /**
  * A simple [Fragment] subclass.
@@ -21,6 +24,7 @@ class FavouritesFragment : Fragment() {
 
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var categoriesView: View
 
     private val favBooksListViewModel = FavBooksListViewModel()
 
@@ -28,10 +32,14 @@ class FavouritesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         searchView = view.findViewById(R.id.fragment_favourites_search)
+        categoriesView = view.findViewById(R.id.fragment_favourites_categories_chip_group_view)
+        recyclerView = view.findViewById<RecyclerView>(R.id.fragment_favourites_recycler_view)
 
-        favBooksListViewModel.fetch {
-            initRecyclerView(view)
-        }
+        handleSelectedCategories()
+
+        favBooksListViewModel.fetch(
+            afterAction = { initRecyclerView() }
+        )
     }
 
     override fun onCreateView(
@@ -42,9 +50,42 @@ class FavouritesFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_favourites, container, false)
     }
 
-    private fun initRecyclerView(v: View) {
+    private fun handleSelectedCategories() {
+        val bookCategories = categoriesView.findViewById<ChipGroup>(R.id.categories_chip_group_categories)
+        bookCategories?.setOnCheckedStateChangeListener { group, checkedIds ->
 
-        recyclerView = v.findViewById<RecyclerView>(R.id.fragment_favourites_recycler_view)
+            if (checkedIds.isNotEmpty()) {
+
+                onCategoryCheckedChange(checkedIds)
+
+            } else {
+                Toast.makeText(context, "tümü", Toast.LENGTH_SHORT).show()
+                favBooksListViewModel.fetch(
+                    afterAction = { initRecyclerView() }
+                )
+            }
+        }
+    }
+
+    private fun onCategoryCheckedChange(checkedIds: List<Int>) {
+
+        val types = ArrayList<String>()
+
+        checkedIds.forEach { chipId ->
+
+            val secilenChip = categoriesView.findViewById<Chip>(chipId)
+            val turAdi = secilenChip?.contentDescription.toString()
+
+            types.add(turAdi)
+        }
+
+        favBooksListViewModel.fetch(
+            types = types,
+            afterAction = { initRecyclerView() }
+        )
+    }
+
+    private fun initRecyclerView() {
 
         val adapter = HomeFragment.BookAdapter(
             ArrayList(FavBooksListModel.getFavBookList().toList()),
