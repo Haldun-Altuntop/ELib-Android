@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    android:background="#F8F9FA">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Profil" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
 
-</FrameLayout>
+        <ProgressBar
+            android:id="@+id/fragment_profile_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="visible" />
+
+        <include
+            android:id="@+id/fragment_profile_logged_in"
+            layout="@layout/layout_profile_settings"
+            android:visibility="gone"/>
+
+        <include
+            android:id="@+id/fragment_profile_not_logged_in"
+            layout="@layout/activity_logister"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</ScrollView>

@@ -1,15 +1,24 @@
 package arc.haldun.elib
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import arc.haldun.mylibrary.api.ApiService
+import arc.haldun.mylibrary.api.UserRepository
+import arc.haldun.mylibrary.driver.objects.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * A simple [Fragment] subclass.
@@ -17,17 +26,24 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class ProfileFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    // VIEWS
+    private lateinit var progressBar: ProgressBar
+    private lateinit var ivProfilePicture: ImageView
+    private lateinit var tvUsername: TextView
+    private lateinit var tvBio: TextView
+    private lateinit var etEmail: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var tvLanguagePreference: TextView
+    private lateinit var switchNotifications: Switch
+    private lateinit var btnSave: Button
+    private lateinit var btnLogout: Button
+
+    // LAYOUTS
+    private lateinit var profileLayout: View
+    private lateinit var logisterLayout: View
+
+    private var user: User? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,23 +53,59 @@ class ProfileFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ProfileFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ProfileFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        progressBar = view.findViewById(R.id.fragment_profile_progress_bar)
+        ivProfilePicture = view.findViewById(R.id.ivProfilePicture)
+        tvUsername = view.findViewById(R.id.tvUsername)
+        tvBio = view.findViewById(R.id.tvBio)
+        etEmail = view.findViewById(R.id.etEmail)
+        etPassword = view.findViewById(R.id.etPassword)
+        tvLanguagePreference = view.findViewById(R.id.tvLanguagePreference)
+        switchNotifications = view.findViewById(R.id.switchNotifications)
+        btnSave = view.findViewById(R.id.btnSave)
+        btnLogout = view.findViewById(R.id.btnLogout)
+        profileLayout = view.findViewById(R.id.fragment_profile_logged_in)
+        logisterLayout = view.findViewById(R.id.fragment_profile_not_logged_in)
+
+        switchNotifications.setOnCheckedChangeListener { compoundButton, isChecked ->
+            handleNotificationsSwitch(isChecked)
+        }
+
+        btnSave.setOnClickListener {
+            handleSaveButtonClick()
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            user = UserRepository(ApiService()).getUser()
+            Thread.sleep(100)
+
+            withContext(Dispatchers.Main) {
+
+                progressBar.visibility = View.GONE
+
+                if (user == null) logisterLayout.visibility = View.VISIBLE
+                else profileLayout.visibility = View.VISIBLE
+
+                tvUsername.text = user?.name
+
             }
+        }
+    }
+
+    private fun handleNotificationsSwitch(isChecked: Boolean) {
+
+        if (isChecked) {
+            Toast.makeText(context, "Bildirimler açıldı", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Bildirimler kapatıldı", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    private fun handleSaveButtonClick() {
+
     }
 }

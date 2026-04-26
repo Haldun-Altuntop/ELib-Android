@@ -8,7 +8,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import arc.haldun.elib.viewmodels.BookListViewModel
 import arc.haldun.mylibrary.api.ApiService
 import arc.haldun.mylibrary.api.LibraryInitializer
 import arc.haldun.mylibrary.api.TokenManager
